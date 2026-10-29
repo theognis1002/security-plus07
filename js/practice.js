@@ -2,7 +2,11 @@
 var Practice = (function () {
   var C = Core;
   var CARD_QUESTION_RATE = 0.25;
+  var TYPES = [["single", "Single answer"], ["multi", "Multiple choice"], ["match", "Matching (performance-based)"]];
+  var ALL_TYPES = TYPES.map(function (t) { return t[0]; });
   var settings = C.store.get("practice.settings", { domains: DOMAIN_IDS.slice(), useCards: true });
+  // Settings saved before the type filter existed have no `types`.
+  if (!settings.types) settings.types = ALL_TYPES.slice();
   var deck = [];
   var retry = [];
   var lastId = null;
@@ -13,7 +17,9 @@ var Practice = (function () {
   function freshSession() { return { answered: 0, right: 0, streak: 0, best: 0, perDomain: {} }; }
 
   function eligibleQuestions() {
-    return QBANK.items.filter(function (q) { return settings.domains.indexOf(q.domain) >= 0; });
+    return QBANK.items.filter(function (q) {
+      return settings.domains.indexOf(q.domain) >= 0 && settings.types.indexOf(q.type) >= 0;
+    });
   }
 
   function eligibleCards() {
@@ -40,7 +46,8 @@ var Practice = (function () {
         if (again) { again.retry = true; return again; }
       }
     }
-    var cards = settings.useCards ? eligibleCards() : [];
+    // Term questions are single-answer, so they only belong when that type is selected.
+    var cards = settings.useCards && settings.types.indexOf("single") >= 0 ? eligibleCards() : [];
     if (cards.length && Math.random() < CARD_QUESTION_RATE) {
       var ci = C.makeCardInstance(C.pick(cards), FCBANK.items);
       if (ci) return ci;
@@ -72,7 +79,7 @@ var Practice = (function () {
     inst = nextInstance();
     graded = false;
     if (!inst) {
-      $("#p-question").html("<p>Select at least one domain.</p>");
+      $("#p-question").html("<p>Select at least one domain and one question type.</p>");
       $("#p-submit").prop("disabled", true);
       return;
     }
@@ -115,11 +122,16 @@ var Practice = (function () {
       return '<label class="chk"><input type="checkbox" value="' + d + '"' + (settings.domains.indexOf(d) >= 0 ? " checked" : "") +
         "> D" + d + " " + C.esc(DOMAINS[d].name) + "</label>";
     }).join(""));
+    $("#p-type-boxes").html(TYPES.map(function (t) {
+      return '<label class="chk"><input type="checkbox" value="' + t[0] + '"' + (settings.types.indexOf(t[0]) >= 0 ? " checked" : "") +
+        "> " + C.esc(t[1]) + "</label>";
+    }).join(""));
     $("#p-use-cards").prop("checked", settings.useCards);
   }
 
   function settingsChanged() {
     settings.domains = $("#p-domain-boxes input:checked").map(function () { return +this.value; }).get();
+    settings.types = $("#p-type-boxes input:checked").map(function () { return this.value; }).get();
     settings.useCards = $("#p-use-cards").is(":checked");
     C.store.set("practice.settings", settings);
     deck = [];
@@ -129,7 +141,7 @@ var Practice = (function () {
 
   function init() {
     renderSettings();
-    $("#p-domain-boxes").on("change", "input", settingsChanged);
+    $("#p-domain-boxes, #p-type-boxes").on("change", "input", settingsChanged);
     $("#p-use-cards").on("change", settingsChanged);
     $("#p-submit").on("click", function () { if (graded) showNext(); else if (C.isAnswered(inst)) grade(); });
     $("#p-skip").on("click", showNext);
