@@ -80,12 +80,29 @@ var Practice = (function () {
     graded = false;
     if (!inst) {
       $("#p-question").html("<p>Select at least one domain and one question type.</p>");
-      $("#p-submit").prop("disabled", true);
+      $("#p-submit, #p-reveal").prop("disabled", true);
       return;
     }
+    $("#p-reveal").prop("disabled", false);
     C.renderQuestion($("#p-question"), inst, function () { $("#p-submit").prop("disabled", !C.isAnswered(inst)); });
     if (inst.retry) $("#p-question").prepend('<div class="retry-tag">Missed earlier</div>');
     $("#p-submit").text("Submit answer").prop("disabled", true);
+  }
+
+  function scheduleRetry() {
+    retry.push({ kind: inst.generated ? "card" : "q", id: inst.generated ? inst.card.term : inst.qid, due: session.answered + 4 + Math.floor(Math.random() * 6) });
+  }
+
+  // Show the answer and explanation without scoring; the question comes back later like a miss.
+  function reveal() {
+    graded = true;
+    scheduleRetry();
+    $("#p-question").html(
+      '<div class="verdict">Answer revealed — not scored</div>' +
+      C.renderGraded(inst, { showStem: true })
+    );
+    $("#p-reveal").prop("disabled", true);
+    $("#p-submit").text("Next question").prop("disabled", false).trigger("focus");
   }
 
   function grade() {
@@ -101,7 +118,7 @@ var Practice = (function () {
       session.best = Math.max(session.best, session.streak);
     } else {
       session.streak = 0;
-      retry.push({ kind: inst.generated ? "card" : "q", id: inst.generated ? inst.card.term : inst.qid, due: session.answered + 4 + Math.floor(Math.random() * 6) });
+      scheduleRetry();
     }
     var life = C.store.get("practice.lifetime", { answered: 0, right: 0 });
     life.answered++;
@@ -113,6 +130,7 @@ var Practice = (function () {
       '<div class="verdict ' + (ok ? "good-text" : "bad-text") + '">' + (ok ? "✔ Correct" : "✘ Incorrect") + "</div>" +
       C.renderGraded(inst, { showStem: true, collapseWhenRight: true })
     );
+    $("#p-reveal").prop("disabled", true);
     $("#p-submit").text("Next question").prop("disabled", false).trigger("focus");
     renderScore();
   }
@@ -145,6 +163,7 @@ var Practice = (function () {
     $("#p-use-cards").on("change", settingsChanged);
     $("#p-submit").on("click", function () { if (graded) showNext(); else if (C.isAnswered(inst)) grade(); });
     $("#p-skip").on("click", showNext);
+    $("#p-reveal").on("click", function () { if (inst && !graded) reveal(); });
     $("#p-reset").on("click", function () { session = freshSession(); retry = []; renderScore(); showNext(); });
     // Keyboard: 1-6 pick an option, Enter submits or moves to the next question.
     $(document).on("keydown", function (e) {
