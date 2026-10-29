@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Security+ Practice</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">Security+ <span>SY0-701</span> Practice</div>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#concepts">Concepts</a>
+      <a href="#exam">Timed Exam</a>
+      <a href="#practice">Endless Practice</a>
+      <a href="#flash">Flashcards</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="view-home" class="view hidden">
+      <div class="card">
+        <h1>CompTIA Security+ (SY0-701) practice</h1>
+        <p>90 questions · 90 minutes · pass 750 (100–900)</p>
+        <p id="home-progress" class="small"></p>
+        <div class="home-actions">
+          <a class="btn primary" href="#concepts">Concepts</a>
+          <a class="btn primary" href="#exam">Timed exam</a>
+          <a class="btn primary" href="#practice">Endless practice</a>
+          <a class="btn primary" href="#flash">Flashcards</a>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Question bank</h2>
+        <table class="bank" id="home-bank"></table>
+      </div>
+    </section>
+
+    <!-- CONCEPTS -->
+    <section id="view-concepts" class="view hidden">
+      <div id="c-tabs" class="tabs"></div>
+      <div id="c-body"></div>
+    </section>
+
+    <!-- TIMED EXAM -->
+    <section id="view-exam" class="view hidden">
+      <div id="exam-setup" class="card hidden">
+        <h1>Timed exam</h1>
+        <div id="exam-resume" class="notice hidden">An exam is in progress. <button id="exam-resume-btn" class="btn">Resume exam</button></div>
+        <label class="field">Length
+          <select id="exam-length">
+            <option value="full">Full exam — 90 questions / 90 minutes</option>
+            <option value="half">Half exam — 45 questions / 45 minutes</option>
+            <option value="quick">Quick check — 20 questions / 20 minutes</option>
+          </select>
+        </label>
+        <button id="exam-start" class="btn primary">Start exam</button>
+        <div id="exam-history"></div>
+      </div>
+
+      <div id="exam-run" class="hidden">
+        <div class="exam-bar">
+          <span id="exam-pos"></span>
+          <label class="chk"><input type="checkbox" id="exam-flag"> Flag for review</label>
+          <span class="exam-timer" title="Time remaining"></span>
+        </div>
+        <div class="card" id="exam-q"></div>
+        <div class="row">
+          <button id="exam-prev" class="btn">Previous</button>
+          <button id="exam-to-review" class="btn">Review all</button>
+          <button id="exam-next" class="btn primary">Next</button>
+        </div>
+      </div>
+
+      <div id="exam-review" class="card hidden">
+        <div class="exam-bar"><b>Review your answers</b><span class="exam-timer"></span></div>
+        <p id="exam-review-summary"></p>
+        <p class="small"><span class="legend answered">Answered</span> <span class="legend unanswered">Unanswered</span> <span class="legend flagged">Flagged</span></p>
+        <div id="exam-grid"></div>
+        <div class="row">
+          <button id="exam-back" class="btn">Back to exam</button>
+          <button id="exam-submit" class="btn danger">Submit exam</button>
+        </div>
+      </div>
+
+      <div id="exam-results" class="hidden">
+        <div class="card" id="exam-results-summary"></div>
+        <div class="row between">
+          <label class="chk"><input type="checkbox" id="exam-show-all"> Show correct answers too</label>
+          <button id="exam-new" class="btn primary">New exam</button>
+        </div>
+        <div id="exam-result-list"></div>
+      </div>
+    </section>
+
+    <!-- ENDLESS PRACTICE -->
+    <section id="view-practice" class="view hidden">
+      <details class="card settings">
+        <summary>Practice settings</summary>
+        <div id="p-domain-boxes" class="boxes"></div>
+        <label class="chk"><input type="checkbox" id="p-use-cards"> Include flashcard terms</label>
+      </details>
+      <div class="scoreboard">
+        <div><b id="p-answered">0</b><span>Answered</span></div>
+        <div><b id="p-right">0</b><span>Correct</span></div>
+        <div><b id="p-pct">–</b><span>Score</span></div>
+        <div><b id="p-streak">0</b><span>Streak</span></div>
+        <div><b id="p-best">0</b><span>Best streak</span></div>
+      </div>
+      <div id="p-domains" class="center"></div>
+      <div class="card" id="p-question"></div>
+      <div class="row">
+        <button id="p-reset" class="btn">Reset score</button>
+        <button id="p-skip" class="btn">Skip</button>
+        <button id="p-submit" class="btn primary" disabled>Submit answer</button>
+      </div>
+    </section>
+
+    <!-- FLASHCARDS -->
+    <section id="view-flash" class="view hidden">
+      <div class="card settings-row">
+        <label class="field">Show first
+          <select id="f-mode">
+            <option value="term">Term first</option>
+            <option value="def">Definition first</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </label>
+        <label class="field">Domain
+          <select id="f-domain">
+            <option value="all">All domains</option>
+          </select>
+        </label>
+        <label class="field">Group <select id="f-group"></select></label>
+        <label class="chk"><input type="checkbox" id="f-hide-known"> Hide known</label>
+      </div>
+      <div class="f-stage">
+        <div id="f-card" class="f-card" tabindex="0" role="button">
+          <div class="f-face f-front" id="f-front"></div>
+          <div class="f-face f-back" id="f-back"></div>
+        </div>
+      </div>
+      <div class="row">
+        <button id="f-prev" class="btn">← Prev</button>
+        <span id="f-pos" class="f-pos"></span>
+        <button id="f-next" class="btn">Next →</button>
+      </div>
+      <div class="row">
+        <button id="f-again" class="btn danger">Again (1)</button>
+        <button id="f-got" class="btn good">Got it (2)</button>
+      </div>
+      <div class="row">
+        <button id="f-shuffle" class="btn">Shuffle</button>
+        <span id="f-known-count" class="small"></span>
+        <button id="f-reset-known" class="btn">Reset known</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/vendor/jquery-3.7.1.min.js"></script>
+  <script src="js/bank.js"></script>
+  <!-- Data files: add new files here to extend the bank. -->
+  <script src="data/questions/d1-general-concepts.js"></script>
+  <script src="data/questions/d2-threats-vulns-mitigations.js"></script>
+  <script src="data/questions/d3-security-architecture.js"></script>
+  <script src="data/questions/d4-security-operations.js"></script>
+  <script src="data/questions/d5-program-management.js"></script>
+  <script src="data/flashcards.js"></script>
+  <script src="data/concepts.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/exam.js"></script>
+  <script src="js/practice.js"></script>
+  <script src="js/flashcards.js"></script>
+  <script src="js/concepts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
